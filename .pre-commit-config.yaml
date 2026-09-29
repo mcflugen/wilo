@@ -1,0 +1,65 @@
+repos:
+- repo: https://github.com/psf/black-pre-commit-mirror
+  rev: 26.3.1
+  hooks:
+  - id: black
+
+- repo: https://github.com/keewis/blackdoc
+  rev: v0.4.6
+  hooks:
+  - id: blackdoc
+    description: "Black for doctests"
+    exclude: ^README\.md$
+
+- repo: https://github.com/pycqa/flake8
+  rev: 7.3.0
+  hooks:
+  - id: flake8
+    additional_dependencies:
+    - flake8-bugbear
+    - flake8-comprehensions
+    - flake8-simplify
+
+- repo: https://github.com/asottile/pyupgrade
+  rev: v3.21.2
+  hooks:
+  - id: pyupgrade
+    args: [--py312-plus]
+
+- repo: https://github.com/PyCQA/isort
+  rev: 9.0.0a3
+  hooks:
+  - id: isort
+    name: isort (python)
+    args: [--force-single-line-imports]
+    types: [python]
+
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v6.0.0
+  hooks:
+    - id: check-builtin-literals
+    - id: check-added-large-files
+    - id: check-case-conflict
+    - id: check-toml
+    - id: check-yaml
+    - id: debug-statements
+    - id: end-of-file-fixer
+    - id: forbid-new-submodules
+    - id: mixed-line-ending
+    - id: trailing-whitespace
+    - id: name-tests-test
+    - id: file-contents-sorter
+      args: [--unique]
+      files: |
+        (?x)^(
+          .gitignore
+        )
+    - id: check-merge-conflict
+
+- repo: https://github.com/pre-commit/mirrors-mypy
+  rev: v1.20.2
+  hooks:
+  - id: mypy
+    language_version: python3.12
+    additional_dependencies: [numpy, types-tabulate]
+    types: [python]
