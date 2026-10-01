@@ -1,0 +1,77 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "wilo"
+description = "Utilities for a winner/loser NFL pool"
+version = "0.1.0"
+authors = [
+  {email = "mcflugen@gmail.com", name = "Eric Hutton"}
+]
+maintainers = [
+  {email = "mcflugen@gmail.com", name = "Eric Hutton"}
+]
+keywords = [
+  "nfl",
+  "optimize",
+]
+license = "MIT"
+license-files = ["LICENSE.md"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3.15",
+  "Topic :: Software Development",
+  "Topic :: Software Development :: Version Control",
+  "Topic :: Utilities",
+]
+requires-python = ">=3.14"
+dependencies = []
+dynamic = ["readme"]
+
+[project.urls]
+homepage = "https://github.com/mcflugen/wilo"
+documentation = "https://github.com/mcflugen/wilo/blob/main/README.md"
+changelog = "https://github.com/mcflugen/wilo/blob/main/CHANGES.md"
+repository = "https://github.com/mcflugen/wilo"
+
+[project.optional-dependencies]
+dev = ["nox"]
+tables = ["tabulate"]
+optimize = ["scipy"]
+
+[project.scripts]
+wilo = "wilo._cli:main"
+
+[tool.setuptools.dynamic]
+readme = {file = ["README.md", "AUTHORS.md", "CHANGES.md"], content-type="text/markdown"}
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = ["src", "tests"]
+norecursedirs = [".*", "*.egg*", "build", "dist"]
+addopts = [
+  "--tb=native",
+  "--durations=16",
+  "--strict-markers",
+  "--doctest-modules",
+  "-vvv",
+]
+doctest_optionflags = [
+  "NORMALIZE_WHITESPACE",
+  "IGNORE_EXCEPTION_DETAIL",
+  "ALLOW_UNICODE"
+]
+
+[tool.isort]
+combine_as_imports = true
+profile = "black"
+
+[tool.black]
+target-version = ["py312"]
