@@ -121,12 +121,25 @@ Commands print JSON by default. Add `--table` for a GitHub-style Markdown table:
 ```sh
 wilo --data=data/2026 picks
 wilo --data=data/2026 picks --table
+wilo --data=data/2026 picks --week 3 --week 4 --table
 wilo --data=data/2026 picks --player "John Cleese" --player "Michael Palin" --table
+wilo --data=data/2026 picks --player "John Cleese" --week 3 --table
+wilo --data=data/2026 picks --player "John Cleese" --week 3
 wilo --data=data/2026 standings --table
 ```
 
-Repeat `--player` to select multiple players when displaying the pool. Standings
-use the saved scores and configured weekly points; ties earn half credit.
+For `picks`, use `--player` to select players and `--week` to select weeks (1–17).
+Repeat either option to select multiple values, or combine them to show only the
+selected players' picks for the selected weeks. Omit a filter to include all
+players or all weeks. Both filters apply to JSON and table output.
+
+JSON output is grouped by week, then player. Table output shows one table per
+week, with a row for each player. When `--player` is supplied, it instead shows
+one table per selected player, with a row for each selected week, including when
+`--week` is also supplied.
+
+Standings use the saved scores and configured weekly points; ties earn half
+credit.
 
 ## Predict games and optimize picks
 

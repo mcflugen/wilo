@@ -32,9 +32,11 @@ def build_parser() -> argparse.ArgumentParser:
     init_parser.set_defaults(func=cmd_init)
 
     pool_parser = subparsers.add_parser("picks")
-    pool_parser.add_argument("--table", action="store_true")
-    pool_parser.add_argument("--player", action="append", default=None)
     pool_parser.set_defaults(func=cmd_picks)
+    pool_parser.add_argument("--table", action="store_true")
+
+    pool_parser.add_argument("--player", action="append", default=None)
+    pool_parser.add_argument("--week", action="append", type=int, default=None)
 
     season_parser = subparsers.add_parser("season")
     season_parser.set_defaults(func=cmd_season)
