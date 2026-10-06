@@ -33,11 +33,9 @@ def cmd_init(args: argparse.Namespace) -> int:
     config_file = os.path.join(data_dir, CONFIG_FILENAME)
     picks_file = os.path.join(data_dir, PICKS_FILENAME)
 
-    points = dict.fromkeys(range(1, 18), 1.0)
-
     config = PoolConfig(
         players=args.player,
-        points=points,
+        points=args.points,
         season=args.season,
     )
     pool = empty_pool(config.players)
