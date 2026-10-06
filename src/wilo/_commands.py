@@ -3,6 +3,8 @@ from __future__ import annotations
 import argparse
 import os
 from collections.abc import Collection
+from collections.abc import Iterable
+from dataclasses import asdict
 
 from wilo._config import PoolConfig
 from wilo._errors import WiloError
@@ -10,6 +12,7 @@ from wilo._json import pretty_json
 from wilo._output import format_table
 from wilo._output import print_error
 from wilo._output import update_path
+from wilo._picks import Pick
 from wilo._player import first_empty_week
 from wilo._pool import empty_pool
 from wilo._pool import load_pool
@@ -106,25 +109,31 @@ def cmd_picks(args: argparse.Namespace) -> int:
     pool = load_pool(os.path.join(args.data, PICKS_FILENAME))
 
     players = set(pool if args.player is None else args.player)
-
     validate_player(players, allowed=config.players)
 
+    weeks = set(config.points if args.week is None else args.week)
+    validate_week(weeks, allowed=config.points)
+
+    filtered = {}
+    for player in players:
+        filtered[player] = {week: pool[player].for_week(week) for week in weeks}
+
     if args.table:
-        tables = []
-        headers = ("Week", "Winner", "Loser")
-        for player in sorted(players):
-            rows = [
-                (
-                    week,
-                    pool[player].for_week(week).winner,
-                    pool[player].for_week(week).loser,
-                )
-                for week in pool[player].weeks
-            ]
-            tables.append(f"Player: {player}\n" + format_table(rows, headers=headers))
-        out = "\n\n".join(tables)
+        out = (
+            format_picks_by_player(filtered)
+            if args.player
+            else format_picks_by_week(filtered)
+        )
     else:
-        out = save_pool(pool, player=players)
+        out = pretty_json(
+            {
+                week: {
+                    player: asdict(filtered[player][week])
+                    for player in sorted(filtered)
+                }
+                for week in sorted(weeks)
+            }
+        )
 
     print(out)
     return 0
@@ -172,12 +181,9 @@ def cmd_optimize(args: argparse.Namespace) -> int:
     )
 
     if args.table:
-        headers = ["Week", "Winner", "Loser"]
-        rows = [
-            (week, picks.for_week(week).winner, picks.for_week(week).loser)
-            for week in weeks
-        ]
-        out = format_table(rows, headers=headers)
+        out = format_picks_by_player(
+            {args.player: {week: picks.for_week(week) for week in weeks}}
+        )
     else:
         out = pretty_json(
             {
@@ -226,3 +232,54 @@ def validate_player(
     unknown_players = set(player) - set(allowed)
     if unknown_players:
         raise WiloError(f"{', '.join(sorted(unknown_players))}: unknown player")
+
+
+def validate_week(
+    week: int | Collection[int],
+    *,
+    allowed: Collection[int] | None = None,
+) -> None:
+    allowed = set() if allowed is None else allowed
+
+    if isinstance(week, int):
+        week = [week]
+
+    unknown_weeks = set(week) - set(allowed)
+    if unknown_weeks:
+        raise WiloError(
+            f"{', '.join(str(week) for week in sorted(unknown_weeks))}: unknown week"
+        )
+
+
+def format_picks_table(
+    rows: Iterable[tuple[str | int, Pick]],
+    *,
+    label: str,
+) -> str:
+    table = [(key, pick.winner, pick.loser) for key, pick in rows]
+    return format_table(table, headers=[label, "Winner", "Loser"])
+
+
+def format_picks_by_player(
+    pool: dict[str, dict[int, Pick]],
+) -> str:
+    tables = []
+    for player in sorted(pool):
+        table = format_picks_table(sorted(pool[player].items()), label="Week")
+        tables.append(f"Player: {player}\n{table}")
+    return "\n\n".join(tables)
+
+
+def format_picks_by_week(
+    pool: dict[str, dict[int, Pick]],
+) -> str:
+    weeks = next(iter(pool.values()), {})
+
+    tables = []
+    for week in sorted(weeks):
+        table = format_picks_table(
+            [(player, picks[week]) for player, picks in sorted(pool.items())],
+            label="Player",
+        )
+        tables.append(f"Week: {week}\n{table}")
+    return "\n\n".join(tables)
